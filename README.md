@@ -3,6 +3,11 @@
 Home screen com tema da Kurumi Tokisaki para a Samsung S90D (Tizen 9). É um web app Tizen:
 relógio dourado com algarismos romanos, papel de parede e atalhos de apps com ícones seus.
 
+> **Aviso:** este projeto usa SDB, root temporário e alterações de sistema.
+> **Root é por conta e risco**: pode brickar a TV, invalidar a garantia ou
+> perder ajustes. Use apenas em uma TV sua, leia os scripts e guarde os backups.
+> Não há garantia de funcionamento em outra firmware/modelo.
+
 Este repositório também tem as ferramentas usadas para transformar o Kurumi no **Home da TV**,
 remover apps opcionais e desligar o auto-update de firmware. Tudo foi testado nesta TV:
 
@@ -139,6 +144,38 @@ Uma cópia dos assets antigos fica em `tools/backups/assets-<data>/`.
 
 Abra http://localhost:8765. Setas, Enter, Esc (Voltar), `r`, `g`, `y`, `b` imitam o controle.
 O preview simula um pendrive com algumas pastas.
+
+## Modo desenvolvedor na TV
+
+O `sdb` só enxerga a TV com o **modo desenvolvedor** ligado. O caminho varia um
+pouco por modelo/região, mas no S90D (Tizen 9) é:
+
+1. Deixe a TV e o PC na **mesma rede** (Wi-Fi ou cabo).
+2. Na TV, abra **Home → Apps** (ou Smart Hub → Apps).
+3. Abra **App Settings** (o ícone de engrenagem no canto superior direito; em
+   alguns modelos aparece como **Configurações**).
+4. Digite `12345` no campo de PIN.
+5. Na tela **Developer Mode**, ligue **Developer mode**.
+6. Em **Host PC IP** (ou "IP do PC"), digite o IPv4 do **PC** que vai rodar o
+   Tizen Studio/sdb. **Não é o IP da TV.**
+7. Confirme e **reinicie a TV** (desligue e ligue) para o modo valer.
+8. No PC, conecte: `C:\tizen-studio\tools\sdb.exe connect IP_DA_TV:26101`.
+
+Não confunda os dois IPs:
+
+| Onde | Qual IP usar |
+|---|---|
+| TV → Developer Mode → Host PC IP | IP do **PC** (ex.: `192.168.1.10`) |
+| `deploy.ps1 -Tv ...` e `sdb connect ...` | IP da **TV** (ex.: `192.168.1.50`) |
+
+No Windows, o IP do PC sai em `ipconfig` (IPv4 da Wi-Fi/Ethernet na mesma rede).
+O IP da TV aparece em **Configurações → Conexão → Rede → Status da rede** (ou no
+roteador). O `KURUMI_TV`/`-Tv` dos scripts é sempre o IP da TV.
+
+Se o `sdb connect` falhar: confira o IP do PC no Developer Mode, reinicie a TV,
+veja se os dois estão na mesma sub-rede e permita o `sdb.exe`/Python na rede
+privada do firewall do Windows. O root também precisa de conexões de volta da
+TV para o PC.
 
 ## Enviar para a TV
 
@@ -316,6 +353,11 @@ os hashes do `Boot.dll`/`oneservice` antes de reinstalar com
 
 ## Root temporário (opcional)
 
+> **Root é por conta e risco.** O root é temporário, usa uma falha de pesquisa
+> em firmware específica e pode brickar a TV, invalidar a garantia, apagar
+> ajustes ou exigir recovery. Use somente em uma TV sua, leia os scripts e
+> mantenha os backups. Não há garantia.
+
 O debloat precisa de root. O root desta TV é **volátil**: não instala serviço no boot e
 some no reboot. O script usa o caminho `archive-launcher` do projeto
 [samsung-tv-root](https://github.com/chris-ritsen/samsung-tv-root), que foi testado no
@@ -360,7 +402,11 @@ resto por ele. Se um comando travar, espere ~3 minutos e tente de novo.
 - Isto é ferramenta pessoal, testada em **uma** TV e firmware. Não é um instalador universal.
 - Remover apps pode quebrar recursos que você usa. O backup é do banco de pacotes, não dos
   binários; apps removidos podem ser reinstalados pela loja, mas nem sempre com o mesmo estado.
-- Root e mudanças de sistema têm risco. Leia o que cada comando faz antes de rodar.
+- **Root é por conta e risco**: leia os scripts, use uma TV sua, mantenha os backups e
+  esteja preparado para um recovery. Não há garantia contra brick, perda de ajustes ou
+  invalidação de garantia.
+- O modo desenvolvedor deixa o SDB acessível na rede local; use uma rede confiável e
+  desligue quando não estiver usando.
 - Não remova `com.samsung.tv.csfs` (Samsung Home): ele é o fallback do botão Voltar.
 - Não afiliado à Samsung, à Date A Live/Kurumi Tokisaki ou aos donos dos apps citados.
 
