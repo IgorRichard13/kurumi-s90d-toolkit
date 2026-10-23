@@ -12,6 +12,7 @@ launcher de screensaver, em modo somente-leitura.
 from __future__ import annotations
 
 import asyncio
+import os
 import hashlib
 import json
 import pathlib
@@ -193,7 +194,7 @@ async def restore(tv: Tv, agent: Agent) -> int:
 
 async def main() -> int:
     action = sys.argv[1] if len(sys.argv) > 1 else "install"
-    tv = Tv("192.168.1.50")
+    tv = Tv(os.environ.get("KURUMI_TV", "192.168.1.50"))
     tv.connect()
     agent = Agent(tv)
     print("== Abrindo shell persistente")

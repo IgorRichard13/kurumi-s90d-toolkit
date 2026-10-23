@@ -151,6 +151,9 @@ Depois, a cada mudança:
 .\deploy.ps1
 ```
 
+O IP padrão dos scripts é `192.168.1.50`; passe `-Tv SEU_IP` no
+`deploy.ps1`/`reapply.ps1` ou defina `KURUMI_TV` para os scripts Python.
+
 Use sempre o mesmo perfil de certificado: desinstalar para contornar um certificado diferente apaga o
 papel de parede salvo. Mantenha o ID `KurumiTV01.Home`.
 

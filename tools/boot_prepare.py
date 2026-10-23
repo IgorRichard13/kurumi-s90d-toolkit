@@ -12,6 +12,7 @@ hashes impressos e atualize tools/boot-hook/Program.cs se necessario.
 from __future__ import annotations
 
 import asyncio
+import os
 import base64
 import hashlib
 import json
@@ -65,7 +66,7 @@ def sha(path: pathlib.Path) -> str:
 
 async def main() -> int:
     OUT.mkdir(exist_ok=True)
-    tv = Tv("192.168.1.50")
+    tv = Tv(os.environ.get("KURUMI_TV", "192.168.1.50"))
     tv.connect()
     agent = Agent(tv)
     print("== Abrindo shell persistente")

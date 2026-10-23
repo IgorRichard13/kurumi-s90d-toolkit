@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import base64
 import pathlib
 import sys
@@ -17,7 +18,7 @@ OUT = pathlib.Path(__file__).resolve().parent / "diagnostics"
 
 
 async def main() -> int:
-    tv = Tv("192.168.1.50")
+    tv = Tv(os.environ.get("KURUMI_TV", "192.168.1.50"))
     tv.connect()
     agent = Agent(tv)
     print("== Abrindo shell persistente")
