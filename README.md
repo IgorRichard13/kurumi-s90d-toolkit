@@ -254,6 +254,13 @@ pode continuar mostrando o `parseinfo.sh` estático; quem lê a cache patchada �
 Para reinstalar o hook: `py -3 tools\boot_install.py install`. Para remover e
 voltar ao screensaver da Samsung: `py -3 tools\boot_install.py restore`.
 
+### OLED / burn-in
+
+O launcher de idle do S90D não garante proteção de burn-in; o conteúdo web é
+responsável. O saver mantém fundo preto, sem texto/logo fixo, e faz fade para
+preto após 10 minutos (`MAX_MS`/`FADE_MS` em `saver/js/saver.js`). É uma
+política conservadora nossa, não um limite da Samsung. Veja `saver/README.md`.
+
 ## Deixar o Kurumi como Home da TV
 
 ```powershell

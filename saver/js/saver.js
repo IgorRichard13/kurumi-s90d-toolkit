@@ -6,6 +6,11 @@
   var STAGE_W = 1920;
   var STAGE_H = 1080;
 
+  // Politica conservadora de burn-in para OLED: fundo preto, sem texto/logo
+  // fixo e fade para preto aos 10 min. Nao e um limite da Samsung.
+  var MAX_MS = 10 * 60 * 1000;
+  var FADE_MS = 60 * 1000;
+
   var stage = document.getElementById('stage');
   var sprite = document.getElementById('sprite');
   var img = document.getElementById('chibi');
@@ -15,6 +20,7 @@
   var vx = 4.2, vy = 3.4;
   var w = 220, h = 220;
   var last = 0;
+  var startedAt = 0;
   var flipped = false;
   var scale = 1;
 
@@ -39,6 +45,15 @@
   }
 
   function frame(now) {
+    if (!startedAt) startedAt = now;
+    var elapsed = now - startedAt;
+    if (elapsed >= MAX_MS) {
+      stage.style.opacity = '0';
+      return;
+    }
+    if (elapsed > MAX_MS - FADE_MS) {
+      stage.style.opacity = String((MAX_MS - elapsed) / FADE_MS);
+    }
     if (!last) last = now;
     var dt = Math.min(40, now - last) / 16.667;
     last = now;
