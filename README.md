@@ -1,7 +1,12 @@
 # Kurumi S90D Toolkit
 
-Home screen com tema da Kurumi Tokisaki para a Samsung S90D (Tizen 9). É um web app Tizen:
-relógio dourado com algarismos romanos, papel de parede e atalhos de apps com ícones seus.
+Home screen com tema da Kurumi Tokisaki para a Samsung S90D (Tizen 9). É um web app Tizen,
+feito para ser o mais leve possível:
+
+- relógio dourado com algarismos romanos, saudação conforme a hora, frase da Kurumi e clima;
+- papel de parede e atalhos de apps e entradas HDMI com ícones seus;
+- menu **☰ Mais** (rodapé ou botão azul) com pendrive (fotos, vídeos e músicas), entradas HDMI,
+  navegador, loja, protetor de tela, informações do sistema e ajustes.
 
 > **Aviso:** este projeto usa SDB, root temporário e alterações de sistema.
 > **Root é por conta e risco**: pode brickar a TV, invalidar a garantia ou
@@ -55,7 +60,7 @@ Tudo fica em `src/`:
 | Menu "Mais" | Lista `extras`: cada item é um app (`appId`/`match`), uma HDMI (`hdmi`) ou uma ação (`"action"`, veja abaixo). `glyph` é o texto do selo, `sub` a linha de baixo, `icon` opcional |
 | Saudação | `greetings` com `madrugada` (0-4h), `manha`, `tarde` e `noite`. `"greetings": false` usa o `greeting` fixo |
 | Frase | `quotes`: lista de frases (troca a cada 10 min). Sem a chave, usa as frases da Kurumi do app |
-| Clima | `"weather": "auto"` (local pelo IP, via ipapi.co), `{"lat": -19.9, "lon": -43.9, "city": "BH"}` ou `false` |
+| Clima | O jeito mais fácil: **Mais → Ajustes → Cidade do clima** na TV (fica salva). No config: `"weather": "auto"` (local pelo IP, via ipapi.co, pode errar a cidade), `{"lat": -19.9, "lon": -43.9, "city": "BH"}` ou `false` |
 | Pendrive | `usbApps`: IDs a tentar no item "App de mídia da Samsung" (padrão `com.samsung.tv.mycontents`, `org.tizen.usb-launcher-tv`) |
 | Outros | `subtitle`, `columns`, `slideSeconds` (apresentação de fotos, padrão 6) |
 
@@ -63,8 +68,9 @@ Ações do `extras`: `usb` (pendrive), `inputs` (entradas HDMI com status), `inf
 `prefs` (ajustes), `walls`, `all`, `samsung`, `reload` e `refresh` (limpa o cache de apps e do clima e recarrega).
 
 O clima é opcional. Com `"weather": "auto"`, o app consulta `ipapi.co` (ou
-`ipwho.is`) para localizar por IP e a Open-Meteo para o clima; use
-`"weather": false` para não fazer essas requisições.
+`ipwho.is`) para localizar por IP e a Open-Meteo para o clima. Digitar a cidade em
+**Ajustes** evita a consulta por IP (a busca da cidade usa a Open-Meteo); use
+`"weather": false` para não fazer nenhuma dessas requisições.
 
 O repo público inclui só `wallpaper1.webp`; para adicionar outros, coloque as
 imagens em `src/assets/`, rode o otimizador e liste-as em `wallpapers`. A pasta
@@ -72,6 +78,16 @@ imagens em `src/assets/`, rode o otimizador e liste-as em `wallpapers`. A pasta
 
 ```powershell
 tools\venv\Scripts\python.exe tools\remove_bg.py "C:\caminho\imagem.jpg" src\assets\icons\nome.png
+```
+
+O `remove_bg.py` usa o modelo aberto do [withoutBG](https://github.com/withoutbg/withoutbg-python)
+rodando no próprio PC (sem chave de API; os pesos são baixados no primeiro uso). Para montar
+o ambiente:
+
+```powershell
+py -3 -m venv tools\venv
+tools\venv\Scripts\python.exe -m pip install withoutbg pillow
+tools\venv\Scripts\python.exe tools\optimize_assets.py   # depois de trocar imagens
 ```
 
 Se um ícone não existir, o app usa o ícone oficial do app instalado; se nem ele existir, a inicial do nome.
@@ -97,16 +113,16 @@ voltaria para o próprio Kurumi. O botão **Home** do controle volta para o Kuru
 
 | Item | O que faz |
 |---|---|
-| Pendrive | Navega pelas pastas do pendrive e abre fotos, vídeos e músicas no próprio Kurumi. Formatos que o player web não abre vão para o player da TV. Avisa quando um pendrive é conectado |
+| Pendrive | Navega pelas pastas do pendrive. Vídeos abrem no player da própria Samsung (com legendas, faixas de áudio e HDR); fotos e músicas abrem no visualizador do Kurumi. Avisa quando um pendrive é conectado |
 | Entradas HDMI | Lista HDMI 1-4 e mostra em quais há aparelho ligado; OK troca a entrada |
-| Navegador, Loja Samsung, Configurações | Abrem os apps da TV |
+| Navegador, Loja Samsung | Abrem os apps da TV (o menu de Configurações da TV não pode ser aberto por app neste modelo) |
 | Protetor de tela | Abre o Kurumi Saver na hora |
 | Papel de parede, Apps instalados, Home da Samsung | O mesmo dos botões do rodapé |
 | Informações | Modelo, firmware, rede, IP, Wi-Fi, tela, memória, armazenamento, pendrives, versão, local do clima |
-| Ajustes | Liga/desliga ponteiro dos segundos, animações de foco, frase e clima (fica salvo na TV) |
+| Ajustes | Liga/desliga ponteiro dos segundos, animações de foco, frase e clima, e define a cidade do clima pelo teclado da TV (fica salvo na TV) |
 | Recarregar | Limpa o cache de apps e do clima e recarrega |
 
-No visualizador do pendrive: ◀ ▶ trocam a foto (ou avançam/voltam 10 s no vídeo), ▲ ▼ vão para o
+No visualizador do pendrive (fotos e músicas): ◀ ▶ trocam a foto (ou avançam/voltam 10 s na música), ▲ ▼ vão para o
 arquivo anterior/próximo, OK pausa (ou inicia a apresentação de fotos), Voltar sai. As teclas ⏯ ⏪ ⏩ ⏹
 do controle também funcionam.
 
@@ -125,7 +141,7 @@ O app foi ajustado para o hardware da TV:
   nos Ajustes tira até isso;
 - o menu "Mais" e as telas de pendrive/entradas/informações/ajustes usam um único painel e
   selos de texto, sem imagens para decodificar;
-- o vídeo do pendrive libera o decodificador ao sair do visualizador;
+- vídeos do pendrive vão para o player nativo da Samsung (decodificação no hardware, legendas e áudio); a música do visualizador libera o decodificador ao sair;
 - o clima é buscado no máximo a cada 30 min e fica em cache; o local, a cada 7 dias;
 - a lista de apps é filtrada para apps de verdade e fica em cache no `localStorage`, então o
   segundo boot é instantâneo;
@@ -398,6 +414,12 @@ resto por ele. Se um comando travar, espere ~3 minutos e tente de novo.
 
 | Arquivo | Para quê |
 |---|---|
+| `src/` | o app Kurumi Home (HTML/CSS/JS + `config.json`) |
+| `preview.ps1` | serve o `src/` em http://localhost:8765 para testar no PC |
+| `deploy.ps1` | gera miniaturas, assina e instala o Kurumi Home na TV |
+| `tools/optimize_assets.py` | converte wallpapers e ícones para WebP leve (1920x1080 / 320x320) |
+| `tools/thumbs.py` | miniaturas do seletor de papel de parede (o `deploy.ps1` chama) |
+| `tools/remove_bg.py` | tira o fundo de ícones e da chibi com o withoutBG |
 | `tools/tv.py` | shell `sdk`, push e diagnóstico pela injeção de nome de pacote |
 | `tools/tv_agent.py` | shell `sdk` persistente por TCP, sem novas injeções |
 | `tools/home.py` | aponta/restaura o Home da TV |

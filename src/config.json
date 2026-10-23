@@ -66,12 +66,6 @@
       "appId": "com.samsung.tv.store"
     },
     {
-      "name": "Configurações",
-      "glyph": "CONF",
-      "sub": "Menu da TV",
-      "appId": "com.samsung.tv.coba.setting"
-    },
-    {
       "name": "Protetor de tela",
       "glyph": "ZZZ",
       "sub": "Kurumi Saver agora",

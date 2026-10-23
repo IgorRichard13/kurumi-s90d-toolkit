@@ -198,4 +198,13 @@ body { font-family: "Samsung One", "SamsungOne", "Segoe UI", sans-serif; color: 
   position: absolute; right: 96px; top: 80px; padding: 18px 28px; border-radius: 14px; max-width: 900px;
   background: rgba(11, 5, 7, .9); border: 2px solid var(--crimson); font-size: 24px;
 }
+/* Scrolling lists clip their overflow, which also cut off the focused item's
+   scale and crimson ring at the edges. Give them inner room for it and pull
+   the box back out by the same amount, so the layout doesn't move. */
+#moregrid, #plist, #alllist, #wallgrid { padding: 22px; margin: -22px; }
+#moregrid { max-height: 844px; }
+#plist { max-height: 824px; }
+#alllist { max-height: 864px; }
+#wallgrid { max-height: 804px; }
+
 .hidden { display: none !important; }

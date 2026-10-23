@@ -23,9 +23,24 @@ ou aos donos dos apps citados.
   “debloat + launcher”, e este projeto é o equivalente Tizen para a S90D.
 - **[samsung-tizen-tv-debloat](https://github.com/ardazeytin/samsung-tizen-tv-debloat)**
   (MIT) — referência pública de debloat em Tizen retail.
-- **[withoutbg](https://github.com/withoutbg/withoutbg)** — modelo local usado
-  por `tools/remove_bg.py` para remover o fundo branco das imagens. O modelo não
-  é redistribuído neste repositório.
+- **[withoutBG](https://github.com/withoutbg/withoutbg-python)** (SDK `withoutbg`
+  do PyPI, licença Apache 2.0) — modelo local usado por `tools/remove_bg.py` para
+  remover o fundo branco das imagens. Os
+  [pesos do modelo](https://huggingface.co/withoutbg/withoutbg-openweights-onnx)
+  usam a withoutBG Open Weights License, com componentes sob licenças próprias:
+  DINOv3 (licença da Meta), Depth Anything V2 small (Apache 2.0) e BiRefNet (MIT).
+  O modelo não é redistribuído neste repositório.
+
+## Serviços usados pelo app
+
+- **[Open-Meteo](https://open-meteo.com/)** — clima (`api.open-meteo.com`) e busca da
+  cidade digitada nos Ajustes (`geocoding-api.open-meteo.com`), sem chave. Dados sob
+  CC BY 4.0 ("Weather data by Open-Meteo.com"); o app mostra o crédito na tela
+  Informações.
+- **[ipapi.co](https://ipapi.co/)** e **[ipwho.is](https://ipwho.is/)** — local
+  aproximado pelo IP quando o clima está em `"auto"`.
+- **[Pillow](https://python-pillow.org/)** (MIT-CMU) — conversão e redimensionamento
+  das imagens em `tools/`.
 
 ## Artes
 

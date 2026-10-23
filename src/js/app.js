@@ -438,7 +438,8 @@
     image: /\.(jpe?g|png|gif|bmp|webp)$/i
   };
   var MIME = { mp4: 'video/mp4', m4v: 'video/mp4', mkv: 'video/x-matroska', webm: 'video/webm', mov: 'video/quicktime',
-    avi: 'video/x-msvideo', ts: 'video/mp2t', mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: 'audio/aac', flac: 'audio/flac',
+    avi: 'video/x-msvideo', ts: 'video/mp2t', m2ts: 'video/mp2t', mts: 'video/mp2t', mpg: 'video/mpeg', mpeg: 'video/mpeg',
+    wmv: 'video/x-ms-wmv', flv: 'video/x-flv', '3gp': 'video/3gpp', mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: 'audio/aac', flac: 'audio/flac',
     wav: 'audio/wav', ogg: 'audio/ogg', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' };
   var MAX_ENTRIES = 400;
   var usb = { roots: [], stack: [], cur: '', listener: null };
@@ -528,7 +529,9 @@
       });
       var cut = entries.length > MAX_ENTRIES;
       if (cut) entries = entries.slice(0, MAX_ENTRIES);
-      var media = entries.filter(function (e) { return !e.dir && kindOf(e.name) !== 'file'; });
+      // Videos go to the TV's own player (subtitles, audio tracks, HDR); the in-app
+      // viewer only browses the photos and music of this folder.
+      var media = entries.filter(function (e) { var k = kindOf(e.name); return !e.dir && (k === 'image' || k === 'audio'); });
       var GLYPH = { video: 'VÍDEO', audio: 'SOM', image: 'FOTO', file: 'ARQ' };
       var items = entries.map(function (e) {
         if (e.dir) {
@@ -543,6 +546,10 @@
           cls: kind === 'file' ? 'dim' : '',
           run: function () {
             if (kind === 'file') openExternal(e);
+            else if (kind === 'video') openExternal(e, function () {
+              toast('O player da TV não abriu. Tocando aqui, sem legendas.');
+              openViewer([e], 0);
+            });
             else openViewer(media, media.indexOf(e));
           }
         };
@@ -566,12 +573,20 @@
     });
   }
 
-  // Hands the file to the TV's own player, for formats the web player can't open.
-  function openExternal(e) {
-    try {
-      var ctl = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/view', e.uri, MIME[extOf(e.name)] || null);
-      tizen.application.launchAppControl(ctl, null, function () {}, function () { toast('A TV não tem app para abrir ' + e.name); });
-    } catch (err) { toast('A TV não tem app para abrir ' + e.name); }
+  // Hands the file to the TV's own player. For videos it also tries Samsung's video
+  // players by id, in case no app answers the generic "view" request.
+  var VIDEO_PLAYERS = ['org.tizen.video-player-tv', 'org.tizen.mycontent-video-player-tv'];
+  function openExternal(e, onFail) {
+    var targets = [null].concat(kindOf(e.name) === 'video' ? ((state.cfg && state.cfg.videoPlayers) || VIDEO_PLAYERS) : []);
+    var i = 0;
+    function giveUp() { if (onFail) onFail(); else toast('A TV não tem app para abrir ' + e.name); }
+    (function next() {
+      if (i >= targets.length) { giveUp(); return; }
+      try {
+        var ctl = new tizen.ApplicationControl('http://tizen.org/appcontrol/operation/view', e.uri, MIME[extOf(e.name)] || null);
+        tizen.application.launchAppControl(ctl, targets[i++], function () {}, next);
+      } catch (err) { next(); }
+    })();
   }
 
   function watchUsb() {
@@ -710,8 +725,10 @@
     v.addEventListener('error', function () {
       if (!v.getAttribute('src') || state.view !== 'viewer') return;
       var e = vw.list[vw.i];
-      toast('Esse formato não toca aqui. Tentando o player da TV...');
       closeViewer();
+      // videos only land here after the TV's player already refused them
+      if (kindOf(e.name) === 'video') { toast('Não consegui tocar ' + e.name); return; }
+      toast('Esse formato não toca aqui. Tentando o player da TV...');
       openExternal(e);
     });
   }
@@ -750,8 +767,9 @@
     }, 7);
     usbStorages(function (r) { set(8, r.length ? r.length + ' conectado(s)' : 'nenhum'); });
     try { set(9, 'versão ' + tizen.application.getAppInfo().version); } catch (e) { set(9, ''); }
-    var loc = store('kurumi.loc');
-    set(10, !prefs.weather ? 'desligado nos Ajustes' : (loc && loc.city ? loc.city : 'sem local ainda'));
+    var loc = store('kurumi.loc.manual') || store('kurumi.loc');
+    // Open-Meteo data is CC BY 4.0, so the credit shows where the weather is described
+    set(10, !prefs.weather ? 'desligado nos Ajustes' : (loc && loc.city ? loc.city : 'sem local ainda') + ' · dados Open-Meteo');
     set(11, Intl.DateTimeFormat().resolvedOptions().timeZone || '');
   }
 
@@ -762,22 +780,93 @@
     { key: 'quote', name: 'Frase da Kurumi', on: 'Muda a cada 10 min', off: 'Escondida' },
     { key: 'weather', name: 'Clima', on: 'Ligado (precisa de internet)', off: 'Desligado' }
   ];
+  function cityLabel() {
+    var m = store('kurumi.loc.manual');
+    return m && m.city ? m.city : 'automático (pelo IP)';
+  }
+
   function openPrefs() {
-    openPanel({
-      title: 'Ajustes', hint: 'OK liga/desliga · Voltar volta', cols: 2,
-      items: PREF_ITEMS.map(function (p) {
-        return {
-          name: p.name, sub: prefs[p.key] ? p.on : p.off, glyph: prefs[p.key] ? 'ON' : 'OFF', cls: prefs[p.key] ? 'on' : '',
-          run: function (it, idx) {
-            prefs[p.key] = !prefs[p.key];
-            store('kurumi.prefs', prefs);
-            applyPrefs();
-            if (p.key === 'weather' && prefs.weather) updateWeather(true);
-            setItem(idx, prefs[p.key] ? p.on : p.off, prefs[p.key] ? 'ON' : 'OFF', prefs[p.key] ? 'on' : '');
-          }
-        };
-      })
+    var items = PREF_ITEMS.map(function (p) {
+      return {
+        name: p.name, sub: prefs[p.key] ? p.on : p.off, glyph: prefs[p.key] ? 'ON' : 'OFF', cls: prefs[p.key] ? 'on' : '',
+        run: function (it, idx) {
+          prefs[p.key] = !prefs[p.key];
+          store('kurumi.prefs', prefs);
+          applyPrefs();
+          if (p.key === 'weather' && prefs.weather) updateWeather(true);
+          setItem(idx, prefs[p.key] ? p.on : p.off, prefs[p.key] ? 'ON' : 'OFF', prefs[p.key] ? 'on' : '');
+        }
+      };
     });
+    items.push({ name: 'Cidade do clima', glyph: 'LOC', sub: cityLabel(), run: function () { openCity(); } });
+    openPanel({ title: 'Ajustes', hint: 'OK · Voltar volta', cols: 2, items: items });
+  }
+
+  /* Cidade do clima: digitada na propria TV (teclado da Samsung) e guardada no
+     aparelho, sem nada hardcoded. Vazio volta ao modo automatico pelo IP. */
+  function cityStatus(msg) { var s = document.getElementById('citystatus'); if (s) s.textContent = msg || ''; }
+
+  function openCity() {
+    state.view = 'cityedit';
+    var ov = document.createElement('div');
+    ov.id = 'cityedit';
+    ov.style.cssText = 'position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(11,5,7,.9);';
+    var box = document.createElement('div');
+    box.style.cssText = 'width:1000px;max-width:86%;padding:44px 52px;border-radius:24px;background:rgba(20,6,10,.97);border:2px solid rgba(217,180,90,.5);box-shadow:0 20px 60px rgba(0,0,0,.6);';
+    var h = document.createElement('div'); h.textContent = 'Cidade do clima';
+    h.style.cssText = 'font-size:38px;color:#f5ece6;margin-bottom:10px;';
+    var hint = document.createElement('div');
+    hint.textContent = 'Digite a cidade e aperte OK · Voltar cancela · vazio volta ao automático';
+    hint.style.cssText = 'font-size:22px;color:rgba(245,236,230,.62);margin-bottom:26px;';
+    var form = document.createElement('form');
+    var inp = document.createElement('input');
+    inp.id = 'cityinput'; inp.type = 'text'; inp.autocomplete = 'off'; inp.placeholder = 'Ex.: Betim';
+    var m = store('kurumi.loc.manual'); if (m && m.city) inp.value = m.city;
+    inp.style.cssText = 'width:100%;font-size:40px;padding:18px 22px;border-radius:14px;border:2px solid #d9b45a;background:#0b0507;color:#f5ece6;outline:none;';
+    form.appendChild(inp);
+    form.onsubmit = function (e) { e.preventDefault(); confirmCity(); return false; };
+    var st = document.createElement('div'); st.id = 'citystatus';
+    st.style.cssText = 'font-size:24px;color:#d9b45a;margin-top:20px;min-height:28px;';
+    box.appendChild(h); box.appendChild(hint); box.appendChild(form); box.appendChild(st);
+    ov.appendChild(box);
+    $('stage').appendChild(ov);
+    // focar o campo abre o teclado da TV
+    setTimeout(function () { try { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); } catch (e) { /* sem IME */ } }, 80);
+  }
+
+  function closeCity() {
+    var ov = document.getElementById('cityedit');
+    if (ov && ov.parentNode) ov.parentNode.removeChild(ov);
+    state.view = 'home';
+    openPrefs(); // volta aos Ajustes ja com o rotulo atualizado
+  }
+
+  function cancelCity() { closeCity(); }
+
+  function confirmCity() {
+    var inp = document.getElementById('cityinput');
+    if (!inp) return;
+    var q = (inp.value || '').trim();
+    if (!q) {
+      store('kurumi.loc.manual', null);
+      store('kurumi.loc', null);
+      closeCity();
+      toast('Clima: automático');
+      updateWeather(true);
+      return;
+    }
+    cityStatus('Buscando "' + q + '"...');
+    loadJSON('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) +
+      '&count=1&language=pt&format=json', 8000).then(function (r) {
+      var hit = r.results && r.results[0];
+      if (!hit) { cityStatus('Não achei "' + q + '". Tente outro nome.'); return; }
+      var city = hit.name + (hit.admin1 ? ' - ' + hit.admin1 : '');
+      store('kurumi.loc.manual', { lat: hit.latitude, lon: hit.longitude, city: city, t: Date.now() });
+      store('kurumi.loc', null);
+      closeCity();
+      toast('Clima: ' + city);
+      updateWeather(true);
+    }).catch(function () { cityStatus('Sem internet para buscar a cidade.'); });
   }
 
   /* Wallpaper */
@@ -938,6 +1027,9 @@
       ? Math.round(wx.temp) + '° ' + wxText(wx.code) : '';
   }
   function locate() {
+    // cidade digitada na TV e guardada no aparelho tem prioridade e nao expira
+    var manual = store('kurumi.loc.manual');
+    if (manual && manual.lat !== undefined && manual.lat !== null) return Promise.resolve(manual);
     var conf = state.cfg && state.cfg.weather;
     if (conf && typeof conf === 'object' && conf.lat !== undefined) {
       return Promise.resolve({ lat: conf.lat, lon: conf.lon, city: conf.city || '' });
@@ -1049,6 +1141,15 @@
     // browser preview: r / g / y / b stand in for the colour keys
     if (window.__kurumiPreview && PREVIEW_KEYS[e.key]) code = PREVIEW_KEYS[e.key];
     var back = code === KEY.BACK || code === KEY.ESC || code === KEY.BACKSPACE;
+
+    // Enquanto digita a cidade: deixe as teclas chegarem ao campo e ao teclado da
+    // TV. Voltar cancela; OK confirma so quando o teclado ja fechou (campo sem foco).
+    if (state.view === 'cityedit') {
+      var ci = document.getElementById('cityinput');
+      if (back) { e.preventDefault(); cancelCity(); }
+      else if (code === KEY.ENTER && document.activeElement !== ci) { e.preventDefault(); confirmCity(); }
+      return;
+    }
     e.preventDefault();
 
     if (state.view === 'viewer') { viewerKey(code, back); return; }

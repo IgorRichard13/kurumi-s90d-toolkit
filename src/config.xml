@@ -25,6 +25,7 @@
     <tizen:privilege name="http://tizen.org/privilege/system"/>
     <tizen:privilege name="http://tizen.org/privilege/internet"/>
     <access origin="https://api.open-meteo.com" subdomains="false"/>
+    <access origin="https://geocoding-api.open-meteo.com" subdomains="false"/>
     <access origin="https://ipapi.co" subdomains="false"/>
     <access origin="https://ipwho.is" subdomains="false"/>
 

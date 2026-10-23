@@ -2,7 +2,10 @@
 
 Usage:  tools\\venv\\Scripts\\python.exe tools\\remove_bg.py <input> <output.png> [<input> <output.png> ...]
 
-Uses withoutbg's local open-weights model (downloaded on first run, no API key).
+Uses the local open-weights model from withoutBG (https://github.com/withoutbg/withoutbg-python,
+SDK under Apache 2.0). The weights come from Hugging Face
+(withoutbg/withoutbg-openweights-onnx) under the withoutBG Open Weights license. They are
+downloaded on first run; no API key.
 Each result is trimmed to the visible pixels, centred on a transparent square
 and saved at 512x512, which is plenty for a TV tile.
 """
