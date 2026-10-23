@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Kurumi Home: Tizen web app for the Samsung S90D (Tizen 9).
+  package must be exactly 10 letters/digits. Keep the application id stable:
+  if the Home button is ever pointed at this app, it targets this id.
+-->
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets"
+        id="http://kurumi.local/home" version="0.2.0" viewmodes="maximized">
+    <tizen:application id="KurumiTV01.Home" package="KurumiTV01" required_version="6.0"/>
+    <content src="index.html"/>
+    <icon src="icon.png"/>
+    <name>Kurumi Home</name>
+    <feature name="http://tizen.org/feature/screen.size.normal.1080.1920"/>
+
+    <!-- list installed apps, open them, receive the remote's colour keys, switch to an HDMI input -->
+    <tizen:privilege name="http://tizen.org/privilege/application.info"/>
+    <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
+    <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+    <tizen:privilege name="http://tizen.org/privilege/tv.window"/>
+
+    <!-- pendrive (the app only reads it), system info, and the weather over the internet -->
+    <tizen:privilege name="http://tizen.org/privilege/filesystem.read"/>
+    <tizen:privilege name="http://tizen.org/privilege/filesystem.write"/>
+    <tizen:privilege name="http://tizen.org/privilege/externalstorage"/>
+    <tizen:privilege name="http://tizen.org/privilege/system"/>
+    <tizen:privilege name="http://tizen.org/privilege/internet"/>
+    <access origin="https://api.open-meteo.com" subdomains="false"/>
+    <access origin="https://ipapi.co" subdomains="false"/>
+    <access origin="https://ipwho.is" subdomains="false"/>
+
+    <tizen:profile name="tv-samsung"/>
+    <tizen:setting screen-orientation="landscape" context-menu="disable"
+                   background-support="disable" encryption="disable"
+                   install-location="auto" hwkey-event="enable"/>
+</widget>

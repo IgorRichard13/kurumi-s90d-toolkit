@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>Kurumi Home</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="stage">
+  <div id="wall"></div>
+  <div id="shade"></div>
+
+  <header id="top">
+    <div id="clockface"></div>
+    <div id="timebox">
+      <div id="time">--:--</div>
+      <div id="date"><span id="dtxt"></span><span id="weather"></span></div>
+      <div id="greeting"></div>
+      <div id="quote"></div>
+    </div>
+  </header>
+
+  <main id="dock">
+    <div id="subtitle"></div>
+    <div id="tiles"></div>
+  </main>
+
+  <!-- reached with Down from the app row -->
+  <nav id="actions">
+    <div class="pill" data-act="walls">Papel de parede</div>
+    <div class="pill" data-act="all">Apps instalados</div>
+    <div class="pill more" data-act="more">&#9776;&nbsp; Mais</div>
+    <div class="pill" data-act="samsung">Home da Samsung</div>
+  </nav>
+
+  <section id="walls" class="hidden">
+    <h2>Papel de parede <small>OK escolhe · Voltar cancela</small></h2>
+    <div id="wallgrid"></div>
+  </section>
+
+  <section id="all" class="hidden">
+    <h2>Apps instalados <small>Use o ID no config.json</small></h2>
+    <div id="alllist"></div>
+  </section>
+
+  <section id="more" class="hidden">
+    <h2>Mais <small>OK abre · Voltar fecha · botão azul abre daqui de qualquer lugar</small></h2>
+    <div id="moregrid"></div>
+  </section>
+
+  <!-- one reusable list panel: pendrive, entradas, informações, ajustes -->
+  <section id="panel" class="hidden">
+    <h2><span id="ptitle"></span> <small id="phint"></small></h2>
+    <div id="plist"></div>
+  </section>
+
+  <section id="viewer" class="hidden">
+    <img id="vimg" alt="">
+    <video id="vvid" preload="metadata"></video>
+    <div id="vaudio" class="hidden"></div>
+    <div id="vbar" class="hidden">
+      <div id="vname"></div>
+      <div id="vtrack"><div id="vfill"></div></div>
+      <div id="vinfo"></div>
+    </div>
+  </section>
+
+  <div id="toast" class="hidden"></div>
+</div>
+<script>if (!window.tizen) document.write('<script src="js/mock-tizen.js"><\/script>');</script>
+<script src="js/app.js"></script>
+</body>
+</html>

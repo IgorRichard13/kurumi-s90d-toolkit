@@ -1,0 +1,26 @@
+html, body {
+  width: 100%; height: 100%; margin: 0;
+  background: #000; overflow: hidden; cursor: none;
+}
+
+/* Palco fixo, igual ao Kurumi Home: a quicada e calculada em 1920x1080
+   e o palco inteiro e escalado para a janela do app. */
+#stage {
+  position: absolute; left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  transform-origin: 0 0; overflow: hidden;
+  background: #000;
+}
+#sprite {
+  position: absolute; left: 0; top: 0;
+  will-change: transform;
+}
+#chibi { display: block; width: 360px; height: auto; }
+#placeholder {
+  position: absolute; left: 0; top: 0;
+  display: flex; align-items: center; justify-content: center;
+  width: 220px; height: 220px; border-radius: 18px;
+  background: #c0142f; color: #f5ece6;
+  font: 700 34px/1 "Samsung One", "Segoe UI", sans-serif;
+  letter-spacing: 3px;
+}

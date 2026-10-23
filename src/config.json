@@ -1,0 +1,114 @@
+{
+  "greeting": "Ara ara~ bem-vindo de volta",
+  "greetings": {
+    "madrugada": "Ara ara~ ainda acordado a esta hora?",
+    "manha": "Ara ara~ bom dia",
+    "tarde": "Ara ara~ boa tarde",
+    "noite": "Ara ara~ boa noite"
+  },
+  "subtitle": "Zafkiel",
+  "columns": 5,
+  "weather": "auto",
+  "wallpapers": [
+    "assets/wallpaper1.webp"
+  ],
+  "apps": [
+    {
+      "name": "YouTube",
+      "appId": "9Ur5IzDKqV.TizenYouTube",
+      "match": "youtube",
+      "icon": "assets/icons/youtube.webp"
+    },
+    {
+      "name": "Crunchyroll",
+      "appId": "OGLLvqej7u.CrunchyrollWebApp",
+      "match": "crunchyroll",
+      "icon": "assets/icons/crunchyroll.webp"
+    },
+    {
+      "name": "Plex",
+      "appId": "kIciSQlYEM.plex",
+      "match": "plex",
+      "icon": "assets/icons/plex.webp"
+    },
+    {
+      "name": "IPTV",
+      "match": "iptv",
+      "icon": "assets/icons/iptv.webp"
+    },
+    {
+      "name": "PC",
+      "hdmi": "auto",
+      "icon": "assets/icons/pc.webp"
+    }
+  ],
+  "extras": [
+    {
+      "name": "Pendrive",
+      "glyph": "USB",
+      "sub": "Fotos, vídeos e músicas",
+      "action": "usb"
+    },
+    {
+      "name": "Entradas HDMI",
+      "glyph": "HDMI",
+      "sub": "Mostra o que está ligado",
+      "action": "inputs"
+    },
+    {
+      "name": "Navegador",
+      "glyph": "WEB",
+      "appId": "org.tizen.browser"
+    },
+    {
+      "name": "Loja Samsung",
+      "glyph": "LOJA",
+      "appId": "com.samsung.tv.store"
+    },
+    {
+      "name": "Configurações",
+      "glyph": "CONF",
+      "sub": "Menu da TV",
+      "appId": "com.samsung.tv.coba.setting"
+    },
+    {
+      "name": "Protetor de tela",
+      "glyph": "ZZZ",
+      "sub": "Kurumi Saver agora",
+      "appId": "KurumiSvr1.Saver"
+    },
+    {
+      "name": "Papel de parede",
+      "glyph": "IMG",
+      "action": "walls"
+    },
+    {
+      "name": "Apps instalados",
+      "glyph": "APPS",
+      "action": "all"
+    },
+    {
+      "name": "Informações",
+      "glyph": "INFO",
+      "sub": "IP, rede, memória",
+      "action": "info"
+    },
+    {
+      "name": "Ajustes",
+      "glyph": "AJU",
+      "sub": "Segundos, animações, clima",
+      "action": "prefs"
+    },
+    {
+      "name": "Home da Samsung",
+      "glyph": "HOME",
+      "action": "samsung"
+    },
+    {
+      "name": "Recarregar",
+      "glyph": "↻",
+      "sub": "Atualiza apps e clima",
+      "action": "refresh"
+    }
+  ]
+}
