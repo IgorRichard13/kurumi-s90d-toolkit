@@ -12,6 +12,9 @@ ou aos donos dos apps citados.
 - **[samsung-tv-root](https://github.com/chris-ritsen/samsung-tv-root)**
   (licença Unlicense) — rota de root `archive-launcher` usada por
   `tools/root.py`; os payloads compilados vêm do release oficial do projeto.
+- **[samsung-tv-root-untethered](https://github.com/levkropp/samsung-tv-root-untethered)**
+  — fork com agente de boot e bridge SDB para root não-tethered; referência
+  testada no Q60B, não na S90D. Não é usado por este projeto.
 - **[motodrizzle no r/Tizen](https://www.reddit.com/r/Tizen/comments/1wl4e0n/i_made_a_minimal_plexyoutube_launcher_the_default/)**
   — relato original de transformar um launcher local no Home do S90D e de
   enxugar os helpers do Samsung Home.

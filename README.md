@@ -33,6 +33,9 @@ funciona com os fallbacks para os demais.
   de Home/screensaver para S90D/QN90A; várias ideias daqui vieram de lá.
 - [samsung-tv-root](https://github.com/chris-ritsen/samsung-tv-root) — rota de
   root `archive-launcher` usada por `tools/root.py`.
+- [samsung-tv-root-untethered](https://github.com/levkropp/samsung-tv-root-untethered)
+  — fork com agente de root no boot + bridge SDB; testado no Q60B
+  (`T-NKLBAKUC-1720.7`), não na S90D/DUABC.
 - [cleanyourtv](https://github.com/Gathin23/cleanyourtv) — debloat + launcher para
   **Android TV/Google TV**; não é Tizen, mas é a inspiração do conceito. Este
   projeto é o equivalente Tizen para a S90D.
@@ -363,6 +366,19 @@ some no reboot. O script usa o caminho `archive-launcher` do projeto
 [samsung-tv-root](https://github.com/chris-ritsen/samsung-tv-root), que foi testado no
 S90D. Ele troca `/etc/passwd` e a chave pública do SDB apenas dentro de um namespace de
 mount privado, executa o payload como root e limpa tudo no final.
+
+### O root é automático?
+
+Não. O `tools/root.py` adquire root sob demanda e o root é volátil: depois de
+reiniciar, não há root. O boot hook do screensaver é um helper **one-shot** do
+AT-HUB (roda como root só para montar o ContentList), não um agente de root: ele
+não abre shell, listener nem reativa o root. Para debloat ou novas mudanças
+depois de um reboot, rode `tools/root.py`/`debloat.py` de novo.
+
+Para root no boot, o fork
+[samsung-tv-root-untethered](https://github.com/levkropp/samsung-tv-root-untethered)
+adiciona um agente de boot + bridge SDB, mas foi testado no Q60B
+(`T-NKLBAKUC-1720.7`) e não é compatível com a S90D/DUABC sem port.
 
 ```powershell
 $env:PATH = 'C:\Program Files\Git\usr\bin;' + $env:PATH   # openssl do Git
