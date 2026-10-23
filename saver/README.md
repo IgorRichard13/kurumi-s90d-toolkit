@@ -14,8 +14,8 @@ política. Este app:
 - mantém o fundo preto;
 - não tem texto, logo ou label fixo em operação normal;
 - mantém a chibi em movimento contínuo;
-- faz fade para preto após 10 minutos (`MAX_MS`/`FADE_MS` em `js/saver.js`) e
-  para de desenhar.
+- faz fade para preto no último minuto e para de desenhar aos 10 minutos
+  (`MAX_MS`/`FADE_MS` em `js/saver.js`).
 
 O limite de 10 minutos é uma **política conservadora nossa**, não um valor
 seguro especificado pela Samsung. Ajuste as constantes em `js/saver.js` se
