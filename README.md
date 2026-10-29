@@ -254,6 +254,12 @@ pode continuar mostrando o `parseinfo.sh` estático; quem lê a cache patchada �
 Para reinstalar o hook: `py -3 tools\boot_install.py install`. Para remover e
 voltar ao screensaver da Samsung: `py -3 tools\boot_install.py restore`.
 
+O app do saver usa `launch_mode="caller"` e não captura teclas. Assim o
+`glscreensaver-launcher` trata o centro/voltar como screensaver e devolve o app
+que estava na tela. O boot hook também inicia um guard (`kurumi-avoc`) que zera
+o flag `new_home` da AVOC e o `preupdate_consent` a cada 30 s; ele roda como
+`sdk`, com fallback root mínimo se o `systemd-run` do boot falhar.
+
 ### OLED / burn-in
 
 O launcher de idle do S90D não garante proteção de burn-in; o conteúdo web é
@@ -322,6 +328,12 @@ Antes de remover, o script:
 
 Pode rodar de novo: pacotes já ausentes são ignorados. Se um firmware futuro reinstalar
 algum app, o `apply` remove de novo.
+
+Nesta TV, os alvos que o sistema reinstalava foram mantidos instalados e desabilitados
+com `pkgcmd -D -t app -n <id>`; o flag `app_disable=true` sobrevive ao reboot e pode ser
+revertido com `pkgcmd -A`. O boot hook também para/mascara os serviços residuais de
+TV Plus, Gaming Hub e MDE; a lista está em `tools/boot-hook/Program.cs` e é específica
+desta firmware.
 
 O próprio sistema pode restaurar alguns apps depois de um reboot. Nesta TV voltaram
 `HEPsqFNie0` (TV Plus), `com.samsung.tv.SmartThingsApp`,

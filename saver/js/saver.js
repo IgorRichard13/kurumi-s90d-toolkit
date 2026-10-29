@@ -90,12 +90,4 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
-
-  // O launcher do screensaver costuma pegar as teclas, mas deixamos uma saida
-  // explicita para o modo de teste/preview.
-  document.addEventListener('keydown', function (e) {
-    if (e.keyCode === 10009 || e.keyCode === 27 || e.keyCode === 8) {
-      try { tizen.application.getCurrentApplication().exit(); } catch (err) { /* preview */ }
-    }
-  });
 })();

@@ -71,6 +71,7 @@ CATEGORIES = {
         "com.samsung.tizen.smartthings-plugin",
         "com.samsung.tizen.smartthings-streaming",
         "com.samsung.tizen.smartthings-thing",
+        "com.samsung.tv.mde-framework",
         "com.samsung.tv.SmartThingsApp",
         "com.samsung.tv.iot-hub-control",
         "com.samsung.tv.iot-service-notification-v2",

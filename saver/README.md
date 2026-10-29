@@ -3,7 +3,8 @@
 App web Tizen usado como conteúdo do screensaver nativo do S90D
 (`KurumiSvr1.Saver`). A chibi quica na diagonal, espelha ao bater nas laterais e
 fica em fundo preto. O launcher nativo cuida do idle, do wake e do keygrab; o app
-apenas desenha.
+apenas desenha. Ele declara `launch_mode="caller"` e não captura teclas, para o
+launcher tratar o centro/voltar e devolver o app que estava na tela.
 
 ## OLED / burn-in
 

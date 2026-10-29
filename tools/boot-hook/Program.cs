@@ -48,6 +48,133 @@ class Boot
         Require(result == 0, "mount failed errno=" + Marshal.GetLastWin32Error());
     }
 
+    static readonly string[] GuardUnits =
+    {
+        "com.samsung.tv.slive-daemon.service",
+        "com.samsung.tv.slive-daemon.path",
+        "slive-provider-daemon.service",
+        "slive-provider-daemon.path",
+        "slive-daemon.service",
+        "slive-daemon.path",
+        "com.samsung.tv.ghdaemon.service",
+        "com.samsung.tv.ghdaemon.path",
+        "ghdaemon.service",
+        "mde-framework.service",
+        "com.samsung.tv.mde-framework.service"
+    };
+
+    static void Run(string file, Action<string> log, params string[] arguments)
+    {
+        try
+        {
+            var start = new ProcessStartInfo(file) { UseShellExecute = false };
+            foreach (string argument in arguments) start.ArgumentList.Add(argument);
+            using var process = Process.Start(start);
+            if (process == null)
+            {
+                log("command failed to start: " + file);
+                return;
+            }
+            if (!process.WaitForExit(10000))
+            {
+                process.Kill(true);
+                log("command timed out: " + file + " " + string.Join(" ", arguments));
+                return;
+            }
+            if (process.ExitCode != 0)
+                log("command exit " + process.ExitCode + ": " + file + " " + string.Join(" ", arguments));
+        }
+        catch (Exception e)
+        {
+            log("command failed: " + file + ": " + e.Message);
+        }
+    }
+
+    static void GuardServices(Action<string> log)
+    {
+        foreach (string unit in GuardUnits)
+        {
+            Run("/bin/systemctl", log, "mask", "--runtime", unit);
+            Run("/bin/systemctl", log, "stop", unit);
+        }
+        log("service guard applied");
+    }
+
+    static void KillLeftovers(Action<string> log)
+    {
+        Run("/bin/sh", log, "-c",
+            "for pid in $(ps -eo pid,comm | awk " +
+            "'$2==\"bms-service\" || $2==\"mde-framework\" || $2 ~ /^slive-provider/ " +
+            "{print $1}'); do kill -9 \"$pid\" 2>/dev/null; done");
+    }
+
+    static void ResetConsent(Action<string> log)
+    {
+        Run("/usr/bin/vconftool", log, "set", "-t", "int",
+            "db/menu/support/softwareupdate/autoupdate", "0", "-f");
+        Run("/usr/bin/vconftool", log, "set", "-t", "int",
+            "db/menu/support/softwareupdate/preupdate_consent", "0", "-f");
+    }
+
+    static bool TryAvocGuard(bool asSdk, string command, Action<string> log)
+    {
+        try
+        {
+            var start = new ProcessStartInfo("/usr/bin/systemd-run")
+            {
+                UseShellExecute = false
+            };
+            start.ArgumentList.Add("--unit=kurumi-avoc");
+            if (asSdk) start.ArgumentList.Add("--uid=901");
+            start.ArgumentList.Add("--on-active=20s");
+            start.ArgumentList.Add("--collect");
+            start.ArgumentList.Add("/bin/sh");
+            start.ArgumentList.Add("-c");
+            start.ArgumentList.Add(command);
+            using var process = Process.Start(start);
+            if (process == null) return false;
+            if (!process.WaitForExit(10000))
+            {
+                process.Kill(true);
+                log("avoc guard timeout");
+                return false;
+            }
+            if (process.ExitCode != 0)
+            {
+                log("avoc guard mode " + (asSdk ? "sdk" : "root") +
+                    " exit " + process.ExitCode);
+                return false;
+            }
+            log("avoc guard scheduled (" + (asSdk ? "sdk" : "root") + ")");
+            return true;
+        }
+        catch (Exception e)
+        {
+            log("avoc guard failed: " + e.Message);
+            return false;
+        }
+    }
+
+    static void StartAvocGuard(Action<string> log)
+    {
+        // O Samsung Home deixa o flag new_home=1; sem ele, Picture Clarity e
+        // Picture Mode ficam indisponiveis. O timer de 20s evita a corrida do
+        // systemd-run durante o boot. Tenta como sdk; se falhar, root.
+        string command =
+            "while :; do " +
+            "/usr/bin/dbus-send --system " +
+            "--dest=org.tizen.tv.avoc /org/tizen/tv/avoc " +
+            "org.tizen.tv.avoc.AvOutputControl.SetNewHome int32:0 " +
+            ">/dev/null 2>&1; " +
+            "/usr/bin/vconftool set -t int " +
+            "db/menu/support/softwareupdate/autoupdate 0 -f >/dev/null 2>&1; " +
+            "/usr/bin/vconftool set -t int " +
+            "db/menu/support/softwareupdate/preupdate_consent 0 -f >/dev/null 2>&1; " +
+            "sleep 30; done";
+        if (TryAvocGuard(true, command, log)) return;
+        TryAvocGuard(false, command, log);
+    }
+
     static void Apply(Action<string> log)
     {
         Require(geteuid() == 0, "must run as root");
@@ -126,6 +253,10 @@ class Boot
             {
                 Log("inactive: " + e.Message);
             }
+            GuardServices(Log);
+            KillLeftovers(Log);
+            ResetConsent(Log);
+            StartAvocGuard(Log);
         }
         catch (Exception e)
         {
